@@ -40,11 +40,13 @@ public class MulticastClient {
      * @param handler callback invoked for every received ChatMessage
      */
     public void start(MessageHandler handler) {
-        running.set(true);
+    	if (!running.compareAndSet(false, true)) {
+        	return; // already running
+   	}
 
-        Thread listenerThread = new Thread(() -> listen(handler), "multicast-listener");
-        listenerThread.setDaemon(true);
-        listenerThread.start();
+    	Thread listenerThread = new Thread(() -> listen(handler), "multicast-listener");
+   	listenerThread.setDaemon(true);
+    	listenerThread.start();
     }
 
     /**
