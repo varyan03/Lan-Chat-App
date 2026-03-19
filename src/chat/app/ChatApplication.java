@@ -12,6 +12,16 @@ import chat.protocol.ChatMessage;
  */
 public final class ChatApplication {
 
+    /**
+     * The main entry point for the LAN Chat Application.
+     * <p>
+     * Expected arguments: username (String).
+     * Initializes the multicast client, registers a shutdown hook to handle
+     * graceful termination, and starts the CLI thread to read user input.
+     *
+     * @param args command-line arguments, exactly one argument (username) is
+     *             required.
+     */
     public static void main(String[] args) {
         if (args.length != 1) {
             System.err.println("Usage: java chat.app.ChatApplication <username>");
@@ -26,32 +36,28 @@ public final class ChatApplication {
             // Start listening for incoming messages
             client.start(message -> {
 
-    // Ignore messages sent by this client
-    if (message.getSender().equals(username)) {
-        return;
-    }
+                // Ignore messages sent by this client
+                if (message.getSender().equals(username)) {
+                    return;
+                }
 
-   	switch (message.getType()) {
-        	case CHAT:
-            		System.out.println(
-                	"[" + message.getSender() + "] " + message.getContent()
-           		 );
-           	 	break;
+                switch (message.getType()) {
+                    case CHAT:
+                        System.out.println(
+                                "[" + message.getSender() + "] " + message.getContent());
+                        break;
 
-        	case JOIN:
-            		System.out.println(
-                	"*** " + message.getSender() + " joined the chat ***"
-            		);
-            		break;
+                    case JOIN:
+                        System.out.println(
+                                "*** " + message.getSender() + " joined the chat ***");
+                        break;
 
-        	case LEAVE:
-            		System.out.println(
-                	"*** " + message.getSender() + " left the chat ***"
-            		);
-            		break;
-    		}
-	});
-
+                    case LEAVE:
+                        System.out.println(
+                                "*** " + message.getSender() + " left the chat ***");
+                        break;
+                }
+            });
 
             // Send JOIN message
             client.send(ChatMessage.join(username));
@@ -66,7 +72,8 @@ public final class ChatApplication {
                     client.send(ChatMessage.leave(username));
                     cli.shutdown();
                     client.shutdown();
-                } catch (Exception ignored) {}
+                } catch (Exception ignored) {
+                }
             }));
 
             cliThread.join();
@@ -76,4 +83,3 @@ public final class ChatApplication {
         }
     }
 }
- 

@@ -10,10 +10,10 @@ import java.util.Objects;
  * A ChatMessage contains all metadata required for
  * interpretation and display:
  * <ul>
- *   <li>Message type</li>
- *   <li>Sender identity</li>
- *   <li>Creation timestamp</li>
- *   <li>Optional textual content</li>
+ * <li>Message type</li>
+ * <li>Sender identity</li>
+ * <li>Creation timestamp</li>
+ * <li>Optional textual content</li>
  * </ul>
  *
  * <p>
@@ -44,7 +44,7 @@ public final class ChatMessage {
     }
 
     /**
-     * Returns the semantic type of this message.
+     * Returns the semantic type of this message (e.g., JOIN, CHAT, LEAVE).
      *
      * @return the message type
      */
@@ -63,6 +63,9 @@ public final class ChatMessage {
 
     /**
      * Returns the creation timestamp of this message.
+     * <p>
+     * The timestamp represents the time the message was created
+     * relative to the UTC epoch.
      *
      * @return timestamp in epoch milliseconds
      */
@@ -90,8 +93,7 @@ public final class ChatMessage {
                 MessageType.JOIN,
                 sender,
                 Instant.now().toEpochMilli(),
-                ""
-        );
+                "");
     }
 
     /**
@@ -105,8 +107,7 @@ public final class ChatMessage {
                 MessageType.LEAVE,
                 sender,
                 Instant.now().toEpochMilli(),
-                ""
-        );
+                "");
     }
 
     /**
@@ -121,8 +122,6 @@ public final class ChatMessage {
                 MessageType.CHAT,
                 sender,
                 Instant.now().toEpochMilli(),
-                content
-        );
+                content);
     }
 }
-

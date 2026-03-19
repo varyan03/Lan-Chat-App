@@ -23,7 +23,8 @@ public class MulticastClient {
     /**
      * Creates and initializes a multicast client.
      *
-     * @throws IOException if the socket cannot be created or the group cannot be joined
+     * @throws IOException if the socket cannot be created or the group cannot be
+     *                     joined
      */
     public MulticastClient() throws IOException {
         this.group = InetAddress.getByName(MulticastConfig.MULTICAST_ADDRESS);
@@ -31,7 +32,11 @@ public class MulticastClient {
         this.socket = new MulticastSocket(port);
 
         socket.setTimeToLive(MulticastConfig.TTL);
-        socket.joinGroup(group);
+
+        NetworkInterface networkInterface = NetworkInterface.getByInetAddress(InetAddress.getLocalHost());
+
+        SocketAddress groupAddress = new InetSocketAddress(group, port);
+        socket.joinGroup(groupAddress, networkInterface);
     }
 
     /**
@@ -40,29 +45,38 @@ public class MulticastClient {
      * @param handler callback invoked for every received ChatMessage
      */
     public void start(MessageHandler handler) {
-    	if (!running.compareAndSet(false, true)) {
-        	return; // already running
-   	}
+        if (!running.compareAndSet(false, true)) {
+            return; // already running
+        }
+        System.out.println("[DEBUG] start() accepted — creating listener thread");
 
-    	Thread listenerThread = new Thread(() -> listen(handler), "multicast-listener");
-   	listenerThread.setDaemon(true);
-    	listenerThread.start();
+        Thread listenerThread = new Thread(() -> listen(handler), "multicast-listener");
+        listenerThread.setDaemon(true);
+        listenerThread.start();
     }
 
     /**
-     * Continuously listens for incoming UDP packets and dispatches
-     * decoded messages to the handler.
+     * Continuously listens for incoming UDP packets on the multicast socket,
+     * decodes them into {@link ChatMessage} objects, and dispatches them
+     * to the provided handler.
+     * <p>
+     * Runs in a blocking loop until the client is stopped.
+     *
+     * @param handler the callback to process decoded messages
      */
     private void listen(MessageHandler handler) {
         byte[] buffer = new byte[4096];
+        long pid = ProcessHandle.current().pid();
+        long tid = Thread.currentThread().getId();
 
+        System.out.println(
+                "[DEBUG] Listener started | PID=" + pid + " | TID=" + tid);
         while (running.get()) {
             try {
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
                 socket.receive(packet);
 
-                ChatMessage message =
-                        MessageCodec.decode(packet.getData(), packet.getLength());
+                ChatMessage message = MessageCodec.decode(packet.getData(), packet.getLength());
 
                 handler.onMessage(message);
 
@@ -82,8 +96,7 @@ public class MulticastClient {
      */
     public void send(ChatMessage message) throws IOException {
         byte[] data = MessageCodec.encode(message);
-        DatagramPacket packet =
-                new DatagramPacket(data, data.length, group, port);
+        DatagramPacket packet = new DatagramPacket(data, data.length, group, port);
 
         socket.send(packet);
     }
@@ -116,4 +129,3 @@ public class MulticastClient {
         void onMessage(ChatMessage message);
     }
 }
-

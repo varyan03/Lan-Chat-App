@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
  * The wire format is a delimiter-based UTF-8 encoded string:
  *
  * <pre>
- * TYPE|SENDER|TIMESTAMP|CONTENT
+ * TYPE | SENDER | TIMESTAMP | CONTENT
  * </pre>
  *
  * <p>
@@ -29,9 +29,11 @@ public final class MessageCodec {
     private static final String JOIN_DELIMITER = "|";
 
     /**
-     * Private constructor to prevent instantiation.
+     * Private constructor to prevent instantiation of this utility class.
+     * All methods are static.
      */
-    private MessageCodec() {}
+    private MessageCodec() {
+    }
 
     /**
      * Encodes a ChatMessage into a UTF-8 byte array suitable
@@ -41,8 +43,7 @@ public final class MessageCodec {
      * @return byte array containing the encoded message
      */
     public static byte[] encode(ChatMessage message) {
-        String payload =
-                message.getType() + JOIN_DELIMITER +
+        String payload = message.getType() + JOIN_DELIMITER +
                 message.getSender() + JOIN_DELIMITER +
                 message.getTimestamp() + JOIN_DELIMITER +
                 message.getContent();
@@ -74,4 +75,3 @@ public final class MessageCodec {
         return new ChatMessage(type, sender, timestamp, content);
     }
 }
-

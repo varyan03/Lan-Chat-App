@@ -19,15 +19,27 @@ public final class ChatCLI implements Runnable {
     private final MulticastClient client;
     private volatile boolean running = true;
 
+    /**
+     * Constructs a ChatCLI instance.
+     *
+     * @param username the username of the local client.
+     * @param client   the multicast client used to broadcast messages.
+     */
     public ChatCLI(String username, MulticastClient client) {
         this.username = username;
         this.client = client;
     }
 
+    /**
+     * Continuously reads user input from standard input and sends it
+     * as chat messages via the network client until stopped.
+     * <p>
+     * Special commands:
+     * - {@code /exit}: stops the CLI and triggers application shutdown.
+     */
     @Override
     public void run() {
-        try (BufferedReader reader =
-                     new BufferedReader(new InputStreamReader(System.in))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(System.in))) {
 
             while (running) {
                 String line = reader.readLine();
@@ -56,4 +68,3 @@ public final class ChatCLI implements Runnable {
         running = false;
     }
 }
-
